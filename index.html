@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Typing Charge Calculator</title>
+<style>
+body {
+    font-family: Arial;
+    background:#f2f2f2;
+    padding:30px;
+}
+.box {
+    background:white;
+    padding:20px;
+    max-width:420px;
+    margin:auto;
+    border-radius:10px;
+    box-shadow:0 0 10px #aaa;
+}
+h2 {text-align:center;}
+input, select {
+    width:100%;
+    padding:10px;
+    margin:10px 0;
+    font-size:16px;
+}
+button {
+    background:#007bff;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+.result {
+    font-size:18px;
+    font-weight:bold;
+    color:green;
+    text-align:center;
+}
+
+/* Instruction button */
+/* Calculator buttons only */
+.calc-btn {
+    width:100%;
+    padding:10px;
+    margin:10px 0;
+    font-size:16px;
+    background:#007bff;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+.info-btn {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    width: auto;              /* VERY IMPORTANT */
+    padding: 6px 12px;
+    font-size: 14px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    z-index: 999;
+}
+
+/* Modal */
+.modal {
+    display:none;
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.5);
+}
+.modal-content {
+    background:white;
+    max-width:600px;
+    margin:50px auto;
+    padding:20px;
+    border-radius:10px;
+    font-size:14px;
+    scrollbar-width: thin;
+    max-height:80vh;      /* screen height limit */
+    overflow-y:auto;      /* vertical scroll */
+}
+.close {
+    float:right;
+    cursor:pointer;
+    font-size:18px;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+<button class="info-btn global-info" onclick="openInfo()">❓ Help</button>
+<div class="box">
+
+<h2>Typing Charge Calculator</h2>
+
+<label>Enter Characters:</label>
+<input type="number" id="chars" placeholder="Enter character count">
+
+<label>Select Language:</label>
+<select id="type">
+    <option value="6">English (₹6 per 100)</option>
+    <option value="12">Tamil Bamini (₹12 per 100)</option>
+</select>
+
+<label>Alignment Type:</label>
+<select id="align">
+    <option value="0">No Alignment (0%)</option>
+    <option value="20">Basic (20%)</option>
+    <option value="40">Medium (40%)</option>
+    <option value="60">Advanced (60%)</option>
+</select>
+
+Maths Question Paper:
+<select id="maths">
+    <option value="0">No</option>
+    <option value="50">Yes (+50%)</option>
+</select>
+
+<button class="calc-btn" onclick="calculate()">Calculate</button>
+<button class="calc-btn" onclick="sendWhatsApp()">Send Bill to WhatsApp</button>
+
+<div class="result" id="result"></div>
+
+<!-- Instructions Modal -->
+<div class="modal" id="infoModal" onclick="bgClose(event)">
+<div class="modal-content">
+<span class="close" onclick="closeInfo()">×</span>
+
+<h3>📐 Alignment Levels – Meaning</h3>
+
+<b>🟢 Basic (20%)</b><br>
+✔ Line spacing<br>
+✔ Paragraph alignment<br>
+✔ Simple font size<br>
+✔ Normal text typing<br>
+👉 Letter / application / normal content
+<br><br>
+
+<b>🟡 Medium (40%)</b><br>
+✔ Headings bold<br>
+✔ Numbering<br>
+✔ Margins set<br>
+✔ Paragraph spacing<br>
+👉 Project, notice, circular, office docs
+<br><br>
+
+<b>🔴 Advanced (60%)</b><br>
+✔ Question paper format<br>
+✔ Tables / sections<br>
+✔ Neat exam layout<br>
+✔ Printing ready<br>
+👉 School exam papers, forms, book typing
+
+<!-- 🔹 Character count guide -->
+<h3>🔤 Character Count Guide</h3>
+
+<b>English:</b><br>
+✔ <u>With space</u> count use pannunga (recommended)<br>
+❌ Without space avoid pannunga
+<br><br>
+
+<b>Tamil (Bamini):</b><br>
+✔ <u>Without space</u> count use pannunga (recommended)<br>
+❌ With space avoid pannunga
+<br><br>
+
+<b>Tamil + English mixed:</b><br>
+✔ Tamil rate select pannunga<br>
+✔ Tamil count method follow pannunga
+
+</div>
+
+
+
+<script>
+let billMessage = "";
+
+function calculate(){
+    let chars = document.getElementById("chars").value;
+    let rate = document.getElementById("type").value;
+    let align = document.getElementById("align").value;
+    let maths = document.getElementById("maths").value;
+
+    if(chars==""){
+        alert("Enter character count");
+        return;
+    }
+
+    let typing = (chars / 100) * rate;
+    let mathsExtra = (typing * maths) / 100;
+    let afterMaths = typing + mathsExtra;
+    let alignment = (afterMaths * align) / 100;
+    let total = Math.round(afterMaths + alignment);
+
+    if(total < 40){ total = 40; }
+
+    document.getElementById("result").innerHTML =
+        "Typing: ₹" + Math.round(typing) + "<br>" +
+        "Maths Extra: ₹" + Math.round(mathsExtra) + "<br>" +
+        "Alignment: ₹" + Math.round(alignment) + "<br><b>Total = ₹ " + total + "</b>";
+
+    billMessage =
+        "Typing Bill Details%0A" +
+        "------------------%0A" +
+        "Typing Charge : ₹" + Math.round(typing) + "%0A" +
+        "Maths Extra   : ₹" + Math.round(mathsExtra) + "%0A" +
+        "Alignment     : ₹" + Math.round(alignment) + "%0A" +
+        "------------------%0A" +
+        "Total Amount  : ₹" + total + "%0A%0A" +
+        "Thank you%0A" +
+        "Veeran Tech Point";
+}
+function sendWhatsApp(){
+    if(billMessage==""){
+        alert("Please calculate bill first");
+        return;
+    }
+
+    // Default WhatsApp number
+    let phone = "919750790586"; // 91 + number
+
+    let url = "https://wa.me/" + phone + "?text=" + billMessage;
+    window.open(url, "_blank");
+}
+function openInfo(){
+    document.getElementById("infoModal").style.display="block";
+}
+function closeInfo(){
+    document.getElementById("infoModal").style.display="none";
+}
+function bgClose(e){
+    if(e.target.id === "infoModal"){
+        closeInfo();
+    }
+}
+</script>
+
+
+
+</body>
+</html>
